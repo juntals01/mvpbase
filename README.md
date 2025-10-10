@@ -85,6 +85,10 @@ npm install -w apps/web <package-name>
 
 ---
 
+npm run -w apps/api migration:generate
+npm run -w apps/api migration:run
+npm run dev -w apps/api
+
 ## 🔥 Firebase (Emulator Ready)
 
 The repo supports local Firebase auth and Firestore emulators via Docker:

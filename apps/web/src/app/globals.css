@@ -2,14 +2,11 @@
 @import 'tailwindcss';
 
 @theme {
-  /* font */
   --font-sans: var(--font-montserrat);
 
-  /* base */
   --color-background: #ffffff;
   --color-foreground: #0f172a;
 
-  /* shadcn tokens */
   --color-card: #ffffff;
   --color-card-foreground: #0f172a;
   --color-popover: #ffffff;
@@ -34,7 +31,6 @@
   --color-input: #e5e7eb;
   --color-ring: #2b7fff;
 
-  /* your custom palettes for direct use (bg-blue-500, bg-cyan-500, etc.) */
   --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;
   --color-blue-200: #bedbff;
@@ -59,7 +55,6 @@
   --color-cyan-900: #104e64;
   --color-cyan-950: #053345;
 
-  /* radii for shadcn */
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
@@ -68,5 +63,13 @@
 @layer base {
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  /* make all interactive buttons show pointer */
+  button,
+  [type='button'],
+  [type='submit'],
+  [role='button'] {
+    @apply cursor-pointer;
   }
 }
