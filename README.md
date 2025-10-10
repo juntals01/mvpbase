@@ -1,135 +1,148 @@
-# Turborepo starter
+# MVP Base — Stable Release
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack **Turborepo** combining **Next.js**, **NestJS**, **Tailwind CSS v4**, **shadcn/ui**, and **Firebase** for modern web app development.  
+This version is marked as the **latest stable release**.
 
-## Using this example
+---
 
-Run the following command:
+## 🚀 Tech Stack
 
-```sh
-npx create-turbo@latest
-```
+**Frontend**
 
-## What's inside?
+- Next.js 14 (App Router)
+- Tailwind CSS v4
+- shadcn/ui + Radix UI
+- TypeScript
 
-This Turborepo includes the following packages/apps:
+**Backend**
 
-### Apps and Packages
+- NestJS (GraphQL-ready)
+- TypeORM or Prisma (flexible)
+- Redis / PostgreSQL (optional)
+- Firebase Emulator (Auth & Firestore)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+**Tooling**
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Turborepo (monorepo manager)
+- ESLint + Prettier (shared configs)
+- Sonner + Lucide Icons
+- Docker-ready for local dev
 
-### Utilities
+---
 
-This Turborepo has some additional tools already setup for you:
+## 📁 Project Structure
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+mvpbase/
+│
+├── apps/
+│ ├── api/ # NestJS backend
+│ └── web/ # Next.js frontend (Tailwind v4 + shadcn/ui)
+│
+├── common/ # Shared configs (eslint, tsconfig, graphql)
+├── package.json
+├── turbo.json
+├── .env
+└── README.md
 
-### Build
+> Root `.env` is shared between both apps.  
+> Workspaces are defined in package.json as `"workspaces": ["apps/*"]`.
 
-To build all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
+## ⚙️ Setup & Commands
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+### Install Dependencies
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+npm install
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Run Both Apps
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+npm run dev
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### Run Only One App
 
-### Develop
+# API (NestJS)
 
-To develop all apps and packages, run the following command:
+npm run dev -w apps/api
 
-```
-cd my-turborepo
+# Web (Next.js)
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+npm run dev -w apps/web
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+### Clean Turbo Cache
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+npx turbo clean
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+### Add Packages
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+# API only
 
-### Remote Caching
+npm install -w apps/api <package-name>
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+# Web only
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+npm install -w apps/web <package-name>
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+---
 
-```
-cd my-turborepo
+## 🔥 Firebase (Emulator Ready)
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+The repo supports local Firebase auth and Firestore emulators via Docker:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+services:
+firebase:
+image: andreysenov/firebase-tools
+container_name: mvpbase-firebase
+restart: no
+ports: - "4000:4000" # Emulator UI - "9099:9099" # Auth Emulator
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Access at:  
+👉 http://localhost:4000
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Keep your config file:
+firebase/firebase.json
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+---
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+## 🌈 UI Stack (shadcn)
 
-## Useful Links
+Installed via:
+npx shadcn@latest init
 
-Learn more about the power of Turborepo:
+Common components:
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- @/components/ui/button
+- @/components/ui/card
+- @/components/ui/sonner (toast)
+- @/components/ui/avatar
+- @/components/ui/input
+
+---
+
+## 🧩 Stable Release Workflow
+
+1. Commit your changes  
+   git add .
+   git commit -m "chore: prepare stable release"
+
+2. Tag the stable version  
+   git tag -a v1.0.0 -m "Stable Release v1.0.0"
+   git push origin v1.0.0
+
+3. Create a GitHub Release
+   - Go to **GitHub → Releases → Draft a new release**
+   - Tag: `v1.0.0`
+   - Title: `Stable Release v1.0.0`
+   - Description: Add changelog or features
+   - Click **Publish Release**
+
+Now your latest commit is publicly marked as **Stable** — like other software releases.
+
+---
+
+## 🧠 Author
+
+**Norberto Libago**  
+Full-stack Developer — Next.js | NestJS | Firebase | Tailwind  
+🌐 https://www.linkedin.com/in/norberto-libago-66641b99/  
+💻 https://github.com/juntals01
