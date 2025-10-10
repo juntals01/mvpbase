@@ -1,4 +1,3 @@
-// apps/web/lib/firebase.ts
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
   connectAuthEmulator,
@@ -14,13 +13,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Singleton Firebase App
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Connect to emulator when in dev mode
+// Connect to emulators only in dev
 if (process.env.NODE_ENV === 'development') {
   connectAuthEmulator(auth, 'http://localhost:9099');
   connectFirestoreEmulator(db, 'localhost', 8080);
