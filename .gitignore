@@ -36,3 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Firebase emulator data
+firebase/*
+!firebase/firebase.json
+!firebase/.gitkeep
