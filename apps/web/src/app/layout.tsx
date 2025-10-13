@@ -1,4 +1,4 @@
-// apps/web/app/layout.tsx
+import AuthListener from '@/components/auth/AuthListener';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -14,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en' suppressHydrationWarning>
-      {children}
+      <body className='min-h-dvh bg-background text-foreground antialiased'>
+        {/* 🔹 Global Firebase Auth listener (syncs with Zustand) */}
+        <AuthListener />
+        {children}
+      </body>
     </html>
   );
 }

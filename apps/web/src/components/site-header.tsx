@@ -1,30 +1,28 @@
-// apps/web/components/site-header.tsx
+// apps/web/src/components/site-header.tsx
 'use client';
 
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { getFirebaseAuth } from '@/lib/firebase';
+import { useApiUser, useAuthReady } from '@/store/useAuthStore';
+import { signOut } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 export function SiteHeader() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const ready = useAuthReady();
+  const user = useApiUser();
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogout = useCallback(async () => {
+    const auth = getFirebaseAuth();
+    if (auth) {
+      await signOut(auth);
+    }
     document.cookie = '__session=; Path=/; Max-Age=0';
     router.push('/login');
-  };
+  }, [router]);
+
+  const authed = ready ? !!user : null;
 
   return (
     <header className='border-b bg-background/80 backdrop-blur'>
@@ -46,7 +44,7 @@ export function SiteHeader() {
         </nav>
 
         <div className='flex items-center gap-3'>
-          {!loading && user ? (
+          {authed === null ? null : authed ? (
             <>
               <Link
                 href='/dashboard'

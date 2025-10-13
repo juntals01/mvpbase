@@ -1,15 +1,10 @@
+// apps/web/src/app/dashboard/layout.tsx
 'use client';
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { auth } from '@/lib/firebase';
-import {
-  onAuthStateChanged,
-  onIdTokenChanged,
-  signOut,
-  User,
-} from 'firebase/auth';
+import { useApiUser, useAuthReady } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 function FullScreenSpinner() {
   return (
@@ -21,69 +16,28 @@ function FullScreenSpinner() {
 
 function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const ready = useAuthReady();
+  const user = useApiUser();
 
-  // 🔹 Monitor auth state and ID token
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setReady(true);
-    });
-
-    const unsubToken = onIdTokenChanged(
-      auth,
-      async (u) => {
-        if (u) {
-          try {
-            const token = await u.getIdToken();
-            if (token) {
-              // Mirror token to cookie (for possible SSR / API calls)
-              document.cookie = `__session=${token}; Path=/; Max-Age=${
-                60 * 60 * 24 * 7
-              }`;
-            }
-          } catch (err) {
-            console.warn('⚠️ Invalid or expired token, signing out...', err);
-            await signOut(auth);
-            router.replace('/login');
-          }
-        } else {
-          // User signed out
-          document.cookie = `__session=; Path=/; Max-Age=0`;
-          setUser(null);
-        }
-      },
-      (error) => {
-        // Catch global token verification errors
-        console.error('Firebase token listener error', error);
-        signOut(auth).then(() => router.replace('/login'));
-      }
-    );
-
-    return () => {
-      unsubAuth();
-      unsubToken();
-    };
-  }, [router]);
-
-  // 🔹 Redirect if not logged in
-  useEffect(() => {
-    if (ready && !user) router.replace('/login');
+    if (!ready) return;
+    if (!user) router.replace('/login');
   }, [ready, user, router]);
 
   if (!ready) return <FullScreenSpinner />;
-  if (!user) return null; // Redirecting
+  if (!user) return null;
 
   return <>{children}</>;
 }
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default function DashboardAuthLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <body className='min-h-dvh bg-background text-foreground antialiased'>
-      <AuthGuard>
-        <DashboardLayout>{children}</DashboardLayout>
-      </AuthGuard>
-    </body>
+    <AuthGuard>
+      <DashboardLayout>{children}</DashboardLayout>
+    </AuthGuard>
   );
 }

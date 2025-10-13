@@ -15,12 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <body className='min-h-dvh bg-background text-foreground antialiased'>
-      <Providers>
-        <SiteHeader />
-        <main className='container mx-auto px-4 py-8'>{children}</main>
-        <SiteFooter />
-      </Providers>
-    </body>
+    <Providers>
+      <SiteHeader />
+      <main className='container mx-auto px-4 py-8'>{children}</main>
+      <SiteFooter />
+    </Providers>
   );
 }

@@ -1,86 +1,47 @@
-// apps/web/app/dashboard/page.tsx
 'use client';
 
-import { api } from '@/lib/api';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import {
+  useApiUser,
+  useAuthError,
+  useAuthLoading,
+  useAuthReady,
+} from '@/store/useAuthStore';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo } from 'react';
 
-type Profile = {
-  id: string;
-  firebaseUid: string;
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
-  phoneNumber: string | null;
-  role: 'user' | 'admin';
-  isOnboarded: boolean;
-  createdAt: string; // coming back as ISO string from API
-  updatedAt: string;
-};
+function FullScreenSpinner() {
+  return (
+    <div className='grid min-h-screen place-items-center'>
+      <div className='h-10 w-10 animate-spin rounded-full border-4 border-black/10 border-t-black' />
+    </div>
+  );
+}
 
 export default function DashboardPage() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
-  const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
+  const router = useRouter();
+  const ready = useAuthReady();
+  const user = useApiUser();
+  const loading = useAuthLoading();
+  const err = useAuthError();
 
+  // redirect when we know we're unauthenticated
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!isMounted) return;
-
-      if (!user) {
-        setAuthed(false);
-        setProfile(null);
-        setErr('You must be signed in to view this page.');
-        setLoading(false);
-        return;
-      }
-
-      setAuthed(true);
-      setErr(null);
-      setLoading(true);
-
-      try {
-        const { data } = await api.get<Profile>('/profiles/me', {
-          signal: controller.signal as any, // Axios supports AbortController
-        });
-        if (!isMounted) return;
-        setProfile(data);
-      } catch (e: any) {
-        if (!isMounted) return;
-        if (e?.name === 'CanceledError') return; // request was canceled
-        const message =
-          e?.response?.data?.message ||
-          (e?.response?.status === 401
-            ? 'Session expired. Please sign in again.'
-            : 'Failed to load profile');
-        setErr(message);
-        setProfile(null);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-      unsub();
-    };
-  }, []);
+    if (!ready) return;
+    if (!user) router.replace('/login');
+  }, [ready, user, router]);
 
   const joined = useMemo(() => {
-    if (!profile?.createdAt) return null;
+    if (!user?.createdAt) return null;
     try {
-      return new Date(profile.createdAt).toLocaleString();
+      return new Date(user.createdAt).toLocaleString();
     } catch {
-      return profile.createdAt;
+      return user.createdAt;
     }
-  }, [profile?.createdAt]);
+  }, [user?.createdAt]);
+
+  if (!ready) return <FullScreenSpinner />;
+  if (!user) return null;
 
   return (
     <section className='space-y-4'>
@@ -89,18 +50,15 @@ export default function DashboardPage() {
         <p className='text-muted-foreground'>You’re authenticated 🎉</p>
       </header>
 
-      {authed === null && <p>Checking authentication…</p>}
-      {authed === false && <p className='text-destructive'>{err}</p>}
+      {loading && <p>Loading user data…</p>}
+      {!loading && err && <p className='text-destructive'>{err}</p>}
 
-      {authed && loading && <p>Loading profile…</p>}
-      {authed && !loading && err && <p className='text-destructive'>{err}</p>}
-
-      {authed && !loading && profile && (
+      {!loading && user && (
         <div className='rounded-lg border p-4 flex items-start gap-4'>
-          {profile.photoURL ? (
+          {user.picture ? (
             <Image
-              src={profile.photoURL}
-              alt={profile.displayName ?? 'Profile photo'}
+              src={user.picture}
+              alt={user.name ?? 'Profile photo'}
               width={56}
               height={56}
               className='rounded-full'
@@ -110,15 +68,12 @@ export default function DashboardPage() {
           )}
 
           <div className='space-y-1'>
-            <div className='font-medium'>
-              {profile.displayName ?? 'No name yet'}
-            </div>
+            <div className='font-medium'>{user.name ?? 'No name yet'}</div>
             <div className='text-sm text-muted-foreground'>
-              {profile.email ?? 'No email'}
+              {user.email ?? 'No email'}
             </div>
-            <div className='text-sm'>Role: {profile.role}</div>
             <div className='text-sm'>
-              Onboarded: {profile.isOnboarded ? 'Yes' : 'No'}
+              Phone: {user.phoneNumber ?? 'No number'}
             </div>
             {joined && (
               <div className='text-xs text-muted-foreground'>
