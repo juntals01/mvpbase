@@ -1,16 +1,8 @@
+// apps/web/src/components/auth/Sidebar.tsx
 'use client';
 
-import {
-  ClipboardList,
-  CreditCard,
-  HelpCircle,
-  LayoutDashboard,
-  Menu,
-  MessageSquare,
-  Settings,
-  ShoppingCart,
-  User,
-} from 'lucide-react';
+import { DASHBOARD_LINKS } from '@/constants/dashboard-links';
+import { LayoutDashboard, Menu, Settings, User } from 'lucide-react';
 import { NavItem } from './NavItem';
 import { SectionDashboard } from './SectionDashboard';
 
@@ -23,15 +15,21 @@ export function Sidebar({
 }) {
   return (
     <aside
-      className={`flex flex-col bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
+      className={`flex flex-col border-r border-gray-200 shadow-sm transition-all duration-300 ${
         sidebarOpen ? 'w-64' : 'w-20'
       }`}
     >
       {/* Logo */}
-      <div className='flex items-center justify-between px-4 py-4 border-b border-gray-200'>
+      <div
+        className={`flex items-center px-4 py-4 border-b border-gray-200 ${
+          sidebarOpen ? 'justify-between' : 'justify-center'
+        }`}
+      >
         <div
           onClick={() => !sidebarOpen && setSidebarOpen(true)}
-          className='flex items-center gap-2 cursor-pointer select-none'
+          className={`flex items-center cursor-pointer select-none ${
+            sidebarOpen ? 'gap-2' : ''
+          }`}
         >
           <div className='bg-indigo-500 text-white font-bold rounded-full h-8 w-8 grid place-items-center'>
             G
@@ -41,7 +39,6 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Only show hamburger if sidebar is open */}
         {sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(false)}
@@ -57,23 +54,9 @@ export function Sidebar({
         <SectionDashboard title='MENU' open={sidebarOpen} />
         <ul className='space-y-1'>
           <NavItem
+            href={DASHBOARD_LINKS.DASHBOARD.path}
             icon={<LayoutDashboard size={18} />}
-            label='Dashboard'
-            open={sidebarOpen}
-          />
-          <NavItem
-            icon={<ShoppingCart size={18} />}
-            label='Food Order'
-            open={sidebarOpen}
-          />
-          <NavItem
-            icon={<ClipboardList size={18} />}
-            label='Manage Menu'
-            open={sidebarOpen}
-          />
-          <NavItem
-            icon={<MessageSquare size={18} />}
-            label='Customer Review'
+            label={DASHBOARD_LINKS.DASHBOARD.label}
             open={sidebarOpen}
           />
         </ul>
@@ -81,23 +64,15 @@ export function Sidebar({
         <SectionDashboard title='OTHERS' open={sidebarOpen} />
         <ul className='space-y-1'>
           <NavItem
+            href={DASHBOARD_LINKS.SETTINGS.path}
             icon={<Settings size={18} />}
-            label='Settings'
+            label={DASHBOARD_LINKS.SETTINGS.label}
             open={sidebarOpen}
           />
           <NavItem
-            icon={<CreditCard size={18} />}
-            label='Payment'
-            open={sidebarOpen}
-          />
-          <NavItem
+            href={DASHBOARD_LINKS.PROFILE.path}
             icon={<User size={18} />}
-            label='Accounts'
-            open={sidebarOpen}
-          />
-          <NavItem
-            icon={<HelpCircle size={18} />}
-            label='Help'
+            label={DASHBOARD_LINKS.PROFILE.label}
             open={sidebarOpen}
           />
         </ul>
