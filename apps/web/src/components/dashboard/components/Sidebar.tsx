@@ -2,7 +2,13 @@
 'use client';
 
 import { DASHBOARD_LINKS } from '@/constants/dashboard-links';
-import { LayoutDashboard, Menu, Settings, User } from 'lucide-react';
+import {
+  CreditCard,
+  LayoutDashboard,
+  Menu,
+  Settings,
+  User,
+} from 'lucide-react';
 import { NavItem } from './NavItem';
 import { SectionDashboard } from './SectionDashboard';
 
@@ -73,6 +79,12 @@ export function Sidebar({
             href={DASHBOARD_LINKS.PROFILE.path}
             icon={<User size={18} />}
             label={DASHBOARD_LINKS.PROFILE.label}
+            open={sidebarOpen}
+          />
+          <NavItem
+            href={DASHBOARD_LINKS.BILLING.path}
+            icon={<CreditCard size={18} />}
+            label={DASHBOARD_LINKS.BILLING.label}
             open={sidebarOpen}
           />
         </ul>

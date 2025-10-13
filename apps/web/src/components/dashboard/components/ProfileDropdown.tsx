@@ -2,7 +2,7 @@
 'use client';
 
 import { signOut } from 'firebase/auth';
-import { LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { CreditCard, LogOut, Settings, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
@@ -76,6 +76,15 @@ export function ProfileDropdown() {
             <div className='flex items-center gap-2'>
               <Settings size={16} />
               <span>{DASHBOARD_LINKS.SETTINGS.label}</span>
+            </div>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href={DASHBOARD_LINKS.BILLING.path}>
+            <div className='flex items-center gap-2'>
+              <CreditCard size={16} />
+              <span>{DASHBOARD_LINKS.BILLING.label}</span>
             </div>
           </Link>
         </DropdownMenuItem>
