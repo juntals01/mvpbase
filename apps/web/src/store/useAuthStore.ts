@@ -5,6 +5,12 @@ import api from '@/lib/api';
 import axios, { AxiosError } from 'axios';
 import { create } from 'zustand';
 
+type UpdateProfileInput = {
+  name?: string | null;
+  picture?: string | null;
+  phoneNumber?: string | null;
+};
+
 type AuthState = {
   user: ApiUser | null;
   ready: boolean;
@@ -15,6 +21,7 @@ type AuthState = {
   setLoading: (v: boolean) => void;
   setError: (m: string | null) => void;
   refresh: () => Promise<void>;
+  updateProfile: (input: UpdateProfileInput) => Promise<ApiUser>;
   clear: () => void;
 };
 
@@ -28,11 +35,12 @@ function extractAxiosMessage(error: AxiosError): string | null {
   return null;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   ready: false,
   loading: false,
   error: null,
+
   setUser: (u) => set({ user: u }),
   setReady: (v) => set({ ready: v }),
   setLoading: (v) => set({ loading: v }),
@@ -40,11 +48,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   clear: () => set({ user: null, loading: false, error: null, ready: true }),
 
+  // Load current user profile
   refresh: async () => {
     try {
       set({ loading: true, error: null });
-      const { data } = await api.get<ApiUser>('/auth/me');
-      set({ user: data, loading: false });
+      const { data } = await api.get<ApiUser>('/users/me');
+      set({ user: data });
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err)
         ? (extractAxiosMessage(err) ??
@@ -54,9 +63,18 @@ export const useAuthStore = create<AuthState>((set) => ({
         : err instanceof Error
           ? err.message
           : 'Failed to load user profile';
-
-      set({ error: msg, user: null, loading: false });
+      set({ error: msg, user: null });
+    } finally {
+      set({ loading: false, ready: true });
     }
+  },
+
+  // Update profile and keep store in sync
+  updateProfile: async (input) => {
+    const { data } = await api.patch<ApiUser>('/users/me', input);
+    // keep email/role from API authoritative
+    set({ user: data });
+    return data;
   },
 }));
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { User } from './user.entity';
 
 type UpsertFromFirebase = {
@@ -41,5 +42,17 @@ export class UsersService {
       lastLoginAt: now,
     });
     return this.repo.save(user);
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    // Only update explicitly allowed fields
+    const toUpdate: Partial<User> = {};
+    if ('name' in dto) toUpdate.name = dto.name ?? null;
+    if ('picture' in dto) toUpdate.picture = dto.picture ?? null;
+    if ('phoneNumber' in dto) toUpdate.phoneNumber = dto.phoneNumber ?? null;
+
+    // Never allow role/email updates here
+    await this.repo.update({ id: userId }, toUpdate);
+    return this.findById(userId);
   }
 }

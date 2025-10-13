@@ -40,9 +40,7 @@ export function Sidebar({
           <div className='bg-indigo-500 text-white font-bold rounded-full h-8 w-8 grid place-items-center'>
             G
           </div>
-          {sidebarOpen && (
-            <span className='font-semibold text-sm'>GOODFOOD</span>
-          )}
+          {sidebarOpen && <span className='font-semibold text-sm'>MVP</span>}
         </div>
 
         {sidebarOpen && (
