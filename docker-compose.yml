@@ -19,24 +19,6 @@ services:
     ports:
       - '${REDIS_PORT}:6379'
 
-  firebase:
-    image: andreysenov/firebase-tools:latest
-    container_name: mvpbase-firebase
-    restart: ${RESTART_POLICY}
-    working_dir: /home/firebase
-    volumes:
-      - ./firebase:/home/firebase
-    ports:
-      - '${FIREBASE_PORT}:4000'
-      - '9099:9099'
-      - '8080:8080'
-    command: >
-      firebase emulators:start
-      --only auth,firestore
-      --import=./firebase
-      --export-on-exit
-      --project demo-mvpbase
-
   minio:
     image: minio/minio
     container_name: mvpbase-minio
