@@ -1,7 +1,9 @@
 // apps/web/src/components/auth/EmailLoginForm.tsx
 'use client';
 
-import api from '@/lib/api';
+import type { User } from '@/interfaces/response';
+import { api } from '@/lib/api';
+
 import { getErrorMessage } from '@/lib/errors';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -20,10 +22,20 @@ export default function EmailLoginForm() {
       setLoading(true);
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available in this environment');
+
+      // Firebase sign in
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       await userCred.user.getIdToken(true);
-      await api.get('/auth/me');
-      router.replace('/dashboard');
+
+      // Fetch user profile from API (includes role)
+      const { data } = await api.get<User>('/auth/me');
+
+      // Redirect based on role
+      if (data.role === 'admin') {
+        router.replace('/admin');
+      } else {
+        router.replace('/dashboard');
+      }
     } catch (err: unknown) {
       alert(getErrorMessage(err, 'Login failed'));
     } finally {

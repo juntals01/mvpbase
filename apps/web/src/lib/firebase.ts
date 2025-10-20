@@ -19,13 +19,11 @@ let _auth: Auth | null = null;
 let _db: Firestore | null = null;
 let _google: GoogleAuthProvider | null = null;
 
-// 🔧 Relax validation: in development w/ emulator, accept any non-empty values
 function getConfig() {
   if (typeof window === 'undefined') return null;
 
-  const usingEmulator =
-    process.env.NODE_ENV === 'development' &&
-    !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST;
+  const isDev = process.env.NODE_ENV === 'development';
+  const usingEmulator = isDev;
 
   const apiKey =
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
@@ -41,14 +39,9 @@ function getConfig() {
     (usingEmulator ? 'demo-app-id' : undefined);
 
   if (!apiKey || !authDomain || !projectId || !appId) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(
-        '[firebase] Missing NEXT_PUBLIC_FIREBASE_* vars. Provide real web config OR rely on emulator fallbacks.'
-      );
-    }
+    console.warn('[firebase] Missing web config; cannot init Firebase.');
     return null;
   }
-
   return { apiKey, authDomain, projectId, appId };
 }
 
@@ -59,12 +52,7 @@ export function getFirebaseApp(): FirebaseApp | null {
   const cfg = getConfig();
   if (!cfg) return null;
 
-  try {
-    _app = getApps().length ? getApp() : initializeApp(cfg);
-  } catch (e) {
-    console.warn('[firebase] initializeApp failed:', e);
-    _app = null;
-  }
+  _app = getApps().length ? getApp() : initializeApp(cfg);
   return _app;
 }
 
@@ -75,19 +63,16 @@ export function getFirebaseAuth(): Auth | null {
   const app = getFirebaseApp();
   if (!app) return null;
 
-  try {
-    _auth = getAuth(app);
-    const host = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST;
-    if (host && process.env.NODE_ENV === 'development') {
-      try {
-        connectAuthEmulator(_auth, `http://${host}`, { disableWarnings: true });
-      } catch {
-        /* ignore double-connect in HMR */
-      }
+  _auth = getAuth(app);
+
+  const host =
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099';
+  if (process.env.NODE_ENV === 'development' && host) {
+    try {
+      connectAuthEmulator(_auth, `http://${host}`, { disableWarnings: true });
+    } catch {
+      /* ignore double-connect in HMR */
     }
-  } catch (e) {
-    console.warn('[firebase] getAuth failed:', e);
-    _auth = null;
   }
   return _auth;
 }
@@ -99,22 +84,21 @@ export function getFirestoreDb(): Firestore | null {
   const app = getFirebaseApp();
   if (!app) return null;
 
-  try {
-    _db = getFirestore(app);
-    const fsHost = process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_HOST;
-    if (fsHost && process.env.NODE_ENV === 'development') {
-      const [host, portStr] = fsHost.split(':');
-      const port = Number(portStr || 8080);
-      try {
-        connectFirestoreEmulator(_db, host || 'localhost', port);
-      } catch {
-        /* ignore double-connect in HMR */
-      }
+  _db = getFirestore(app);
+
+  const fsHost =
+    process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_HOST ||
+    'localhost:8080';
+  if (process.env.NODE_ENV === 'development' && fsHost) {
+    const [host, portStr] = fsHost.split(':');
+    const port = Number(portStr || 8080);
+    try {
+      connectFirestoreEmulator(_db, host || 'localhost', port);
+    } catch {
+      /* ignore double-connect in HMR */
     }
-  } catch (e) {
-    console.warn('[firebase] getFirestore failed:', e);
-    _db = null;
   }
+
   return _db;
 }
 

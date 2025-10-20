@@ -13,9 +13,9 @@ api.interceptors.request.use(async (config) => {
   const user = auth?.currentUser;
   if (!user) return config;
 
-  const token = await user.getIdToken();
+  // Force refresh to avoid stale token 401s
+  const token = await user.getIdToken(true);
 
-  // Normalize to AxiosHeaders, then set Authorization
   const headers =
     config.headers instanceof AxiosHeaders
       ? config.headers
@@ -26,15 +26,3 @@ api.interceptors.request.use(async (config) => {
 
   return config;
 });
-
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    if (typeof window !== 'undefined' && error?.response?.status === 401) {
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;

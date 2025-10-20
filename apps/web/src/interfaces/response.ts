@@ -5,6 +5,7 @@ export interface User {
   name: string | null;
   picture: string | null;
   phoneNumber: string | null;
+  role: 'admin' | 'user';
   createdAt: string;
   updatedAt: string;
   lastLoginAt: string | null;
